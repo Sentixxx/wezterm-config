@@ -3,6 +3,7 @@ local wezterm = require('wezterm')
 local umath = require('utils.math')
 local Cells = require('utils.cells')
 local OptsValidator = require('utils.opts-validator')
+local platform = require('utils.platform')
 
 local nf = wezterm.nerdfonts
 local attr = Cells.attr
@@ -109,11 +110,17 @@ M.setup = function(opts)
          :update_segment_text('battery_icon', battery_icon)
          :update_segment_text('battery_text', battery_text)
 
-      window:set_right_status(
-         wezterm.format(
-            cells:render({ 'date_icon', 'date_text', 'separator', 'battery_icon', 'battery_text' })
-         )
-      )
+      local segments = { 'date_icon', 'date_text' }
+
+      if battery_text ~= '' then
+         if not platform.is_win then
+            table.insert(segments, 'separator')
+         end
+         table.insert(segments, 'battery_icon')
+         table.insert(segments, 'battery_text')
+      end
+
+      window:set_right_status(wezterm.format(cells:render(segments)))
    end)
 end
 
