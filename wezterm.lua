@@ -1,15 +1,19 @@
 local Config = require('config')
 
 require('utils.backdrops')
-   -- :set_focus('#000000')
    -- :set_images_dir(require('wezterm').home_dir .. '/Pictures/Wallpapers/')
-   :set_images()
+   :scan_images_dir()
    :random()
 
 require('events.left-status').setup()
 require('events.right-status').setup({ date_format = '%a %H:%M:%S' })
-require('events.tab-title').setup({ hide_active_tab_unseen = true, numbered_unseen_glyphs = true })
+require('events.tab-title').setup({
+   hide_active_tab_unseen = true,
+   unseen_icon = 'numbered_box',
+   show_progress = true,
+})
 require('events.new-tab-button').setup()
+require('events.gui-startup').setup()
 
 return Config:init()
    :append(require('config.appearance'))
