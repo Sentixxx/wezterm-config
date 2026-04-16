@@ -16,12 +16,12 @@ end
 -- stylua: ignore
 local keys = {
    -- misc/useful --
-   { key = 'F1', mods = 'NONE', action = 'ActivateCopyMode' },
-   { key = 'F2', mods = 'NONE', action = act.ActivateCommandPalette },
-   { key = 'F3', mods = 'NONE', action = act.ShowLauncher },
-   { key = 'F4', mods = 'NONE', action = act.ShowLauncherArgs({ flags = 'FUZZY|TABS' }) },
+   { key = 'F4', mods = 'NONE', action = 'ActivateCopyMode' },
+   { key = 'F5', mods = 'NONE', action = act.ActivateCommandPalette },
+   { key = 'F6', mods = 'NONE', action = act.ShowLauncher },
+   { key = 'F7', mods = 'NONE', action = act.ShowLauncherArgs({ flags = 'FUZZY|TABS' }) },
    {
-      key = 'F5',
+      key = 'F8',
       mods = 'NONE',
       action = act.ShowLauncherArgs({ flags = 'FUZZY|WORKSPACES' }),
    },
@@ -163,7 +163,17 @@ local keys = {
    },
 
    -- panes --
-   -- panes: split panes
+   -- panes: split panes (iTerm2-style: Cmd+D / Cmd+Shift+D, mapped to Alt on Windows/Linux)
+   {
+      key = 'd',
+      mods = mod.SUPER,
+      action = act.SplitVertical({ domain = 'CurrentPaneDomain' }),
+   },
+   {
+      key = 'd',
+      mods = mod.SUPER .. '|SHIFT',
+      action = act.SplitHorizontal({ domain = 'CurrentPaneDomain' }),
+   },
    {
       key = [[\]],
       mods = mod.SUPER,
@@ -176,14 +186,19 @@ local keys = {
    },
 
    -- panes: zoom+close pane
-   { key = 'Enter', mods = mod.SUPER,     action = act.TogglePaneZoomState },
-   { key = 'w',     mods = mod.SUPER,     action = act.CloseCurrentPane({ confirm = false }) },
+   { key = 'Enter', mods = mod.SUPER,             action = act.TogglePaneZoomState },
+   { key = 'Enter', mods = mod.SUPER .. '|SHIFT', action = act.TogglePaneZoomState },
+   { key = 'w',     mods = mod.SUPER,             action = act.CloseCurrentPane({ confirm = false }) },
 
    -- panes: navigation
    { key = 'k',     mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Up') },
    { key = 'j',     mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Down') },
    { key = 'h',     mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Left') },
    { key = 'l',     mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Right') },
+   { key = 'UpArrow',    mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Up') },
+   { key = 'DownArrow',  mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Down') },
+   { key = 'LeftArrow',  mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Left') },
+   { key = 'RightArrow', mods = mod.SUPER_REV, action = act.ActivatePaneDirection('Right') },
    {
       key = 'p',
       mods = mod.SUPER_REV,
@@ -192,9 +207,9 @@ local keys = {
 
    -- panes: scroll pane
    { key = 'u',        mods = mod.SUPER, action = act.ScrollByLine(-5) },
-   { key = 'd',        mods = mod.SUPER, action = act.ScrollByLine(5) },
-   { key = 'PageUp',   mods = 'NONE',    action = act.ScrollByPage(-0.75) },
-   { key = 'PageDown', mods = 'NONE',    action = act.ScrollByPage(0.75) },
+   { key = 'PageUp',   mods = 'SHIFT',   action = act.ScrollByPage(-0.75) },
+   { key = 'PageDown', mods = 'SHIFT',   action = act.ScrollByPage(0.75) },
+   { key = 'k',        mods = 'CTRL|SHIFT', action = act.ClearScrollback('ScrollbackAndViewport') },
 
    -- key-tables --
    -- resizes fonts
