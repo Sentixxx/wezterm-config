@@ -25,6 +25,16 @@ local keys = {
       mods = 'NONE',
       action = act.ShowLauncherArgs({ flags = 'FUZZY|WORKSPACES' }),
    },
+   {
+      key = 'F9',
+      mods = 'NONE',
+      action = act.ActivateKeyTable({
+         name = 'claude_code',
+         one_shot = false,
+         until_unknown = false,
+         prevent_fallback = false,
+      }),
+   },
    { key = 'F11', mods = 'NONE',    action = act.ToggleFullScreen },
    { key = 'F12', mods = 'NONE',    action = act.ShowDebugOverlay },
    { key = 'f',   mods = mod.SUPER, action = act.Search({ CaseInSensitiveString = '' }) },
@@ -236,6 +246,10 @@ local keys = {
 
 -- stylua: ignore
 local key_tables = {
+   claude_code = {
+      { key = 'Enter', mods = 'SHIFT',  action = act.SendString '\u{1b}[13;2u' },
+      { key = 'F9',    mods = 'NONE',   action = 'PopKeyTable' },
+   },
    resize_font = {
       { key = 'k',      action = act.IncreaseFontSize },
       { key = 'j',      action = act.DecreaseFontSize },
