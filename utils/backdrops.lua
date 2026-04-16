@@ -1,6 +1,6 @@
 ---@type Wezterm
 local wezterm = require('wezterm')
-local colors = require('colors.custom')
+local colors = require('themes.catppuccin-mocha')
 
 -- Seeding random numbers before generating for use
 -- Known issue with lua math library
@@ -15,7 +15,7 @@ local GLOB_PATTERN = '*.{jpg,jpeg,png,gif,bmp,ico,tiff,pnm,dds,tga}'
 ---@class BackDrops
 ---@field current_idx number index of current image
 ---@field images string[] background images
----@field images_dir string directory of background images. Default is `wezterm.config_dir .. '/backdrops/'`
+---@field images_dir string directory of background images. Default is `wezterm.config_dir .. '/assets/backdrops/'`
 ---@field no_img boolean focus mode on or off
 local BackDrops = {}
 BackDrops.__index = BackDrops
@@ -26,14 +26,14 @@ function BackDrops:init()
    local backdrops = {
       current_idx = 1,
       images = {},
-      images_dir = wezterm.config_dir .. '/backdrops/',
+      images_dir = wezterm.config_dir .. '/assets/backdrops/',
       no_bg = false,
    }
    return setmetatable(backdrops, self)
 end
 
 ---Override the default `images_dir`
----Default `images_dir` is `wezterm.config_dir .. '/backdrops/'`
+---Default `images_dir` is `wezterm.config_dir .. '/assets/backdrops/'`
 ---
 --- INFO:
 ---  This function must be invoked before `scan_images_dir()`
