@@ -8,6 +8,7 @@ local Cells = require('utils.cells')
 local OptsValidator = require('utils.opts-validator')
 local ustr = require('utils.str')
 local umath = require('utils.math')
+local platform = require('utils.platform')
 
 local nf = wezterm.nerdfonts
 local attr = Cells.attr
@@ -180,6 +181,15 @@ local colors = {
    progress_indeterminate_active  = { bg = '#89b4fa', fg = '#f5e0dc' },
 }
 
+-- The rounded powerline-style tab looks uneven on Windows' titlebar. Use a
+-- flatter renderer there and keep the original renderer elsewhere.
+local windows_colors = {
+   default = { bg = '#181B25', fg = '#BAC2DE' },
+   hover = { bg = '#242A38', fg = '#CDD6F4' },
+   active = { bg = '#31384A', fg = '#F2F5FF', accent = '#89B4FA' },
+   dim = '#7F849C',
+}
+
 ---
 -- ================
 -- Helper functions
@@ -346,6 +356,86 @@ local function check_unseen_output(options, is_active, panes)
    end
 
    return icon
+end
+
+---@param items FormatItem[]
+---@param bg string
+---@param fg string
+---@param text string
+---@param attributes? FormatItem.Attribute[]
+local function push_text(items, bg, fg, text, attributes)
+   table.insert(items, { Background = { Color = bg } })
+   table.insert(items, { Foreground = { Color = fg } })
+   if attributes then
+      for _, item in ipairs(attributes) do
+         table.insert(items, item)
+      end
+   end
+   table.insert(items, { Text = text })
+   table.insert(items, 'ResetAttributes')
+end
+
+---@param event_opts Event.TabTitleOptions
+---@param tab TabInformation
+---@param hover boolean
+---@param max_width number
+---@return FormatItem[]
+local function render_windows_tab(event_opts, tab, hover, max_width)
+   local tab_state = 'default'
+   if tab.is_active then
+      tab_state = 'active'
+   elseif hover then
+      tab_state = 'hover'
+   end
+
+   local palette = windows_colors[tab_state]
+   local process_name = clean_process_name(tab.active_pane.foreground_process_name)
+   local base_title, prefix_icon = create_base_title(tab.active_pane.title, process_name)
+   local unseen_icon = check_unseen_output(event_opts, tab.is_active, tab.panes)
+   local progress = check_progress(event_opts, tab.panes)
+   local inset = 4
+
+   if prefix_icon then
+      inset = inset + 2
+   end
+   if unseen_icon then
+      inset = inset + 2
+   end
+   inset = inset + (2 * #progress)
+
+   local title = create_title(process_name, base_title, max_width, inset)
+   local attrs = tab.is_active and attr(attr.intensity('Bold')) or nil
+   local items = {}
+
+   if tab.is_active then
+      push_text(items, palette.accent, '#11111B', ' ', attrs)
+   end
+
+   push_text(items, palette.bg, palette.fg, ' ', attrs)
+
+   if prefix_icon then
+      push_text(items, palette.bg, palette.fg, prefix_icon .. ' ', attrs)
+   end
+
+   push_text(items, palette.bg, palette.fg, title, attrs)
+
+   if #progress > 0 then
+      push_text(items, palette.bg, windows_colors.dim, ' ', attrs)
+      for i, prog in ipairs(progress) do
+         local prog_colors = colors['progress_' .. prog.status .. '_' .. tab_state]
+         push_text(items, palette.bg, prog_colors.fg, prog.icon, attrs)
+         if i < #progress then
+            push_text(items, palette.bg, windows_colors.dim, ' ', attrs)
+         end
+      end
+   end
+
+   if unseen_icon then
+      push_text(items, palette.bg, '#FFA066', ' ' .. unseen_icon, attrs)
+   end
+
+   push_text(items, palette.bg, palette.fg, ' ', attrs)
+   return items
 end
 
 ---
@@ -548,11 +638,17 @@ M.setup = function(opts)
 
    -- BUILTIN EVENT
    wezterm.on('format-tab-title', function(tab, _tabs, _panes, _config, hover, max_width)
+      max_width = umath.clamp(max_width, 5, 22)
+
+      if platform.is_win then
+         return render_windows_tab(valid_opts, tab, hover, max_width)
+      end
+
       if not tab_list[tab.tab_id] then
          tab_list[tab.tab_id] = Tab:new()
       end
 
-      tab_list[tab.tab_id]:update_cells(valid_opts, tab, hover, umath.clamp(max_width, 5, 22))
+      tab_list[tab.tab_id]:update_cells(valid_opts, tab, hover, max_width)
       return tab_list[tab.tab_id]:render()
    end)
 end
