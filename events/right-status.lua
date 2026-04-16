@@ -1,18 +1,30 @@
+---@type Wezterm
 local wezterm = require('wezterm')
 local umath = require('utils.math')
 local Cells = require('utils.cells')
+local OptsValidator = require('utils.opts-validator')
 
 local nf = wezterm.nerdfonts
 local attr = Cells.attr
+
+---@alias Event.RightStatusOptionsInput { date_format?: string }
+
+---@alias Event.RightStatusOptions { date_format: string }
+
+---Setup options for the right status bar
+---@type OptsValidator
+local EVENT_OPTS = OptsValidator:new({
+   {
+      name = 'date_format',
+      type = 'string',
+      default = '%a %H:%M:%S',
+   },
+})
 
 local M = {}
 
 local ICON_SEPARATOR = nf.oct_dash
 local ICON_DATE = nf.fa_calendar
-
-local SETUP_OPTS = {
-   date_format = '%a %H:%M:%S',
-}
 
 ---@type string[]
 local discharging_icons = {
@@ -79,20 +91,21 @@ local function battery_info()
    return charge, icon .. ' '
 end
 
----@param opts? {date_format?: string} Default: {date_format = '%a %H:%M:%S'}
+---@param opts? Event.RightStatusOptionsInput Default: {date_format = '%a %H:%M:%S'}
 M.setup = function(opts)
-   if opts then
-      if opts.date_format then
-         assert(type(opts.date_format) == 'string', 'date_format must be a string')
-         SETUP_OPTS.date_format = opts.date_format
-      end
+   local valid_opts, err = EVENT_OPTS:validate(opts or {})
+
+   if err then
+      wezterm.log_error(err)
    end
 
-   wezterm.on('update-right-status', function(window, _pane)
+   ---@cast valid_opts Event.RightStatusOptions
+
+   wezterm.on('update-status', function(window, _pane)
       local battery_text, battery_icon = battery_info()
 
       cells
-         :update_segment_text('date_text', wezterm.strftime(SETUP_OPTS.date_format))
+         :update_segment_text('date_text', wezterm.strftime(valid_opts.date_format))
          :update_segment_text('battery_icon', battery_icon)
          :update_segment_text('battery_text', battery_text)
 
