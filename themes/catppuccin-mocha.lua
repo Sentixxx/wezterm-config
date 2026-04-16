@@ -1,4 +1,4 @@
--- A slightly altered version of catppucchin mocha
+-- Catppuccin Mocha
 -- stylua: ignore
 local mocha = {
    rosewater = '#f5e0dc',
@@ -24,7 +24,7 @@ local mocha = {
    surface2  = '#585b70',
    surface1  = '#45475a',
    surface0  = '#313244',
-   base      = '#1f1f28',
+   base      = '#1e1e2e',
    mantle    = '#181825',
    crust     = '#11111b',
 }
@@ -38,47 +38,46 @@ local colorscheme = {
    selection_bg = mocha.surface2,
    selection_fg = mocha.text,
    ansi = {
-      '#0C0C0C', -- black
-      '#C50F1F', -- red
-      '#13A10E', -- green
-      '#C19C00', -- yellow
-      '#0037DA', -- blue
-      '#881798', -- magenta/purple
-      '#3A96DD', -- cyan
-      '#CCCCCC', -- white
+      mocha.surface1,
+      mocha.red,
+      mocha.green,
+      mocha.yellow,
+      mocha.blue,
+      mocha.pink,
+      mocha.teal,
+      mocha.subtext1,
    },
    brights = {
-      '#767676', -- black
-      '#E74856', -- red
-      '#16C60C', -- green
-      '#F9F1A5', -- yellow
-      '#3B78FF', -- blue
-      '#B4009E', -- magenta/purple
-      '#61D6D6', -- cyan
-      '#F2F2F2', -- white
+      mocha.surface2,
+      mocha.red,
+      mocha.green,
+      mocha.yellow,
+      mocha.blue,
+      mocha.pink,
+      mocha.teal,
+      mocha.subtext0,
    },
    tab_bar = {
-      background = 'rgba(0, 0, 0, 0.4)',
+      background = mocha.crust,
       active_tab = {
-         bg_color = mocha.surface2,
+         bg_color = mocha.surface0,
          fg_color = mocha.text,
       },
       inactive_tab = {
-         bg_color = mocha.surface0,
-         fg_color = mocha.subtext1,
+         bg_color = mocha.crust,
+         fg_color = mocha.overlay2,
       },
       inactive_tab_hover = {
          bg_color = mocha.surface0,
-         fg_color = mocha.text,
+         fg_color = mocha.subtext1,
       },
       new_tab = {
-         bg_color = mocha.base,
-         fg_color = mocha.text,
+         bg_color = mocha.crust,
+         fg_color = mocha.overlay1,
       },
       new_tab_hover = {
          bg_color = mocha.mantle,
-         fg_color = mocha.text,
-         italic = true,
+         fg_color = mocha.subtext1,
       },
    },
    visual_bell = mocha.red,
