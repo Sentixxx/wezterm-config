@@ -1,10 +1,14 @@
 local gpu_adapters = require('utils.gpu-adapter')
 local backdrops = require('utils.backdrops')
 local colors = require('themes.catppuccin-mocha')
+local palette = require('config.palette')
+local platform = require('utils.platform')
+
+colors.tab_bar = palette.tab_bar
 
 return {
    max_fps = 120,
-   front_end = 'WebGpu', ---@type 'WebGpu' | 'OpenGL' | 'Software'
+   front_end = platform.is_win and 'OpenGL' or 'WebGpu', ---@type 'WebGpu' | 'OpenGL' | 'Software'
    webgpu_power_preference = 'HighPerformance',
    webgpu_preferred_adapter = gpu_adapters:pick_best(),
    -- webgpu_preferred_adapter = gpu_adapters:pick_manual('Dx12', 'IntegratedGpu'),
@@ -20,6 +24,9 @@ return {
 
    -- color scheme
    colors = colors,
+   window_background_opacity = 1,
+   text_background_opacity = 0.9,
+   win32_system_backdrop = 'Disable',
 
    -- background: pass in `true` if you want wezterm to start with focus mode on (no bg images)
    background = backdrops:initial_options({ no_img = false }),

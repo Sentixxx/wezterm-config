@@ -70,6 +70,7 @@ function BackDrops:_gen_opts()
       table.insert(bg_opts, {
          source = { File = self.images[self.current_idx] },
          horizontal_align = 'Center',
+         opacity = 0.24,
       })
    end
 
@@ -79,7 +80,7 @@ function BackDrops:_gen_opts()
       width = '120%',
       vertical_offset = '-10%',
       horizontal_offset = '-10%',
-      opacity = 0.96,
+      opacity = 0.76,
    })
 
    return bg_opts
@@ -96,7 +97,7 @@ function BackDrops:_gen_no_img_opts()
          width = '120%',
          vertical_offset = '-10%',
          horizontal_offset = '-10%',
-         opacity = 1,
+         opacity = 0.92,
       },
    }
 end

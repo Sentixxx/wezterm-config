@@ -1,5 +1,6 @@
 local wezterm = require('wezterm')
 local fonts = require('config.fonts')
+local palette = require('config.palette')
 local platform = require('utils.platform')
 
 local tab_bar_font = platform.is_win and wezterm.font({
@@ -29,19 +30,19 @@ return {
    window_close_confirmation = 'NeverPrompt',
    window_decorations = platform.is_win and 'INTEGRATED_BUTTONS|RESIZE' or 'TITLE|RESIZE',
    integrated_title_button_alignment = 'Right',
-   integrated_title_button_color = 'Auto',
+   integrated_title_button_color = palette.topbar.button_text,
    integrated_title_button_style = 'Windows',
    integrated_title_buttons = { 'Hide', 'Maximize', 'Close' },
    window_frame = {
-      active_titlebar_bg = '#11111B',
-      inactive_titlebar_bg = '#11111B',
-      active_titlebar_fg = '#CDD6F4',
-      inactive_titlebar_fg = '#7F849C',
-      active_titlebar_border_bottom = '#181825',
-      inactive_titlebar_border_bottom = '#11111B',
-      button_bg = '#11111B',
-      button_fg = '#CDD6F4',
-      button_hover_bg = '#242838',
+      active_titlebar_bg = palette.topbar.bg,
+      inactive_titlebar_bg = palette.topbar.bg_inactive,
+      active_titlebar_fg = palette.topbar.text,
+      inactive_titlebar_fg = palette.topbar.text_dim,
+      active_titlebar_border_bottom = palette.topbar.border,
+      inactive_titlebar_border_bottom = palette.topbar.border_inactive,
+      button_bg = palette.topbar.bg,
+      button_fg = palette.topbar.text,
+      button_hover_bg = palette.topbar.button_hover,
       button_hover_fg = '#FFFFFF',
       font = tab_bar_font,
       font_size = tab_bar_font_size,
