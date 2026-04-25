@@ -8,6 +8,7 @@ local Cells = require('utils.cells')
 local OptsValidator = require('utils.opts-validator')
 local ustr = require('utils.str')
 local umath = require('utils.math')
+local palette = require('config.palette')
 local platform = require('utils.platform')
 
 local nf = wezterm.nerdfonts
@@ -181,14 +182,34 @@ local colors = {
    progress_indeterminate_active  = { bg = '#89b4fa', fg = '#f5e0dc' },
 }
 
--- The rounded powerline-style tab looks uneven on Windows' titlebar. Use a
--- flatter renderer there and keep the original renderer elsewhere.
-local windows_colors = {
-   default = { bg = '#181B25', fg = '#BAC2DE' },
-   hover = { bg = '#242A38', fg = '#CDD6F4' },
-   active = { bg = '#31384A', fg = '#F2F5FF', accent = '#89B4FA' },
-   dim = '#7F849C',
-}
+---@param tab TabInformation
+---@param hover boolean
+local function windows_tab_palette(tab, hover)
+   local tab_colors = palette.topbar.tabs
+   local color = tab_colors[(tab.tab_index % #tab_colors) + 1]
+
+   if tab.is_active then
+      return {
+         bg = color.active,
+         fg = color.active_fg,
+         dim = color.active_fg,
+      }
+   end
+
+   if hover then
+      return {
+         bg = color.hover,
+         fg = palette.topbar.text,
+         dim = color.fg,
+      }
+   end
+
+   return {
+      bg = color.inactive,
+      fg = color.fg,
+      dim = palette.topbar.text_dim,
+   }
+end
 
 ---
 -- ================
@@ -381,14 +402,7 @@ end
 ---@param max_width number
 ---@return FormatItem[]
 local function render_windows_tab(event_opts, tab, hover, max_width)
-   local tab_state = 'default'
-   if tab.is_active then
-      tab_state = 'active'
-   elseif hover then
-      tab_state = 'hover'
-   end
-
-   local palette = windows_colors[tab_state]
+   local tab_palette = windows_tab_palette(tab, hover)
    local process_name = clean_process_name(tab.active_pane.foreground_process_name)
    local base_title, prefix_icon = create_base_title(tab.active_pane.title, process_name)
    local unseen_icon = check_unseen_output(event_opts, tab.is_active, tab.panes)
@@ -407,34 +421,30 @@ local function render_windows_tab(event_opts, tab, hover, max_width)
    local attrs = tab.is_active and attr(attr.intensity('Bold')) or nil
    local items = {}
 
-   if tab.is_active then
-      push_text(items, palette.accent, '#11111B', ' ', attrs)
-   end
-
-   push_text(items, palette.bg, palette.fg, ' ', attrs)
+   push_text(items, tab_palette.bg, tab_palette.fg, ' ', attrs)
 
    if prefix_icon then
-      push_text(items, palette.bg, palette.fg, prefix_icon .. ' ', attrs)
+      push_text(items, tab_palette.bg, tab_palette.fg, prefix_icon .. ' ', attrs)
    end
 
-   push_text(items, palette.bg, palette.fg, title, attrs)
+   push_text(items, tab_palette.bg, tab_palette.fg, title, attrs)
 
    if #progress > 0 then
-      push_text(items, palette.bg, windows_colors.dim, ' ', attrs)
+      push_text(items, tab_palette.bg, tab_palette.dim, ' ', attrs)
       for i, prog in ipairs(progress) do
-         local prog_colors = colors['progress_' .. prog.status .. '_' .. tab_state]
-         push_text(items, palette.bg, prog_colors.fg, prog.icon, attrs)
+         local prog_colors = colors['progress_' .. prog.status .. '_default']
+         push_text(items, tab_palette.bg, prog_colors.fg, prog.icon, attrs)
          if i < #progress then
-            push_text(items, palette.bg, windows_colors.dim, ' ', attrs)
+            push_text(items, tab_palette.bg, tab_palette.dim, ' ', attrs)
          end
       end
    end
 
    if unseen_icon then
-      push_text(items, palette.bg, '#FFA066', ' ' .. unseen_icon, attrs)
+      push_text(items, tab_palette.bg, '#FFA066', ' ' .. unseen_icon, attrs)
    end
 
-   push_text(items, palette.bg, palette.fg, ' ', attrs)
+   push_text(items, tab_palette.bg, tab_palette.fg, ' ', attrs)
    return items
 end
 
