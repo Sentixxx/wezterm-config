@@ -6,7 +6,7 @@ local platform = require('utils.platform')
 
 colors.tab_bar = palette.tab_bar
 
-return {
+local options = {
    max_fps = 120,
    front_end = platform.is_win and 'OpenGL' or 'WebGpu', ---@type 'WebGpu' | 'OpenGL' | 'Software'
    webgpu_power_preference = 'HighPerformance',
@@ -26,7 +26,6 @@ return {
    colors = colors,
    window_background_opacity = 1,
    text_background_opacity = 0.9,
-   win32_system_backdrop = 'Disable',
 
    -- background: pass in `true` if you want wezterm to start with focus mode on (no bg images)
    background = backdrops:initial_options({ no_img = false }),
@@ -57,3 +56,11 @@ return {
       target = 'CursorColor',
    },
 }
+
+if platform.is_win then
+   options.win32_system_backdrop = 'Disable'
+elseif platform.is_mac then
+   options.native_macos_fullscreen_mode = false
+end
+
+return options

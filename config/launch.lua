@@ -24,12 +24,13 @@ if platform.is_win then
       },
    }
 elseif platform.is_mac then
-   options.default_prog = { '/opt/homebrew/bin/fish', '-l' }
+   local zsh = '/bin/zsh'
+   local homebrew_bash = '/opt/homebrew/bin/bash'
+
+   options.default_prog = { zsh, '-l' }
    options.launch_menu = {
-      { label = 'Bash', args = { 'bash', '-l' } },
-      { label = 'Fish', args = { '/opt/homebrew/bin/fish', '-l' } },
-      { label = 'Nushell', args = { '/opt/homebrew/bin/nu', '-l' } },
-      { label = 'Zsh', args = { 'zsh', '-l' } },
+      { label = 'Zsh', args = { zsh, '-l' } },
+      { label = 'Homebrew Bash', args = { homebrew_bash, '-l' } },
    }
 elseif platform.is_linux then
    options.default_prog = { 'fish', '-l' }

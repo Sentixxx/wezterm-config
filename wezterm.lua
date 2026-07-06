@@ -1,11 +1,16 @@
 local Config = require('config')
 
+local platform = require('utils.platform')
+
 require('utils.backdrops')
    -- :set_images_dir(require('wezterm').home_dir .. '/Pictures/Wallpapers/')
    :scan_images_dir()
    :random()
 
 require('events.left-status').setup()
+if platform.is_mac then
+   require('events.right-status').setup()
+end
 require('events.tab-title').setup({
    hide_active_tab_unseen = true,
    unseen_icon = 'numbered_box',

@@ -401,13 +401,21 @@ end
 ---@param hover boolean
 ---@param max_width number
 ---@return FormatItem[]
-local function render_windows_tab(event_opts, tab, hover, max_width)
+local function render_compact_tab(event_opts, tab, hover, max_width)
    local tab_palette = windows_tab_palette(tab, hover)
    local process_name = clean_process_name(tab.active_pane.foreground_process_name)
    local base_title, prefix_icon = create_base_title(tab.active_pane.title, process_name)
    local unseen_icon = check_unseen_output(event_opts, tab.is_active, tab.panes)
    local progress = check_progress(event_opts, tab.panes)
    local inset = 4
+   local title_prefix = ''
+   local outer_padding = ' '
+
+   if platform.is_mac then
+      title_prefix = '⌘' .. tostring(tab.tab_index + 1) .. ' '
+      inset = inset + title_prefix:len()
+      outer_padding = ' '
+   end
 
    if prefix_icon then
       inset = inset + 2
@@ -417,11 +425,11 @@ local function render_windows_tab(event_opts, tab, hover, max_width)
    end
    inset = inset + (2 * #progress)
 
-   local title = create_title(process_name, base_title, max_width, inset)
-   local attrs = tab.is_active and attr(attr.intensity('Bold')) or nil
+   local title = title_prefix .. create_title(process_name, base_title, max_width, inset)
+   local attrs = (tab.is_active and not platform.is_mac) and attr(attr.intensity('Bold')) or nil
    local items = {}
 
-   push_text(items, tab_palette.bg, tab_palette.fg, ' ', attrs)
+   push_text(items, tab_palette.bg, tab_palette.fg, outer_padding, attrs)
 
    if prefix_icon then
       push_text(items, tab_palette.bg, tab_palette.fg, prefix_icon .. ' ', attrs)
@@ -444,7 +452,7 @@ local function render_windows_tab(event_opts, tab, hover, max_width)
       push_text(items, tab_palette.bg, '#FFA066', ' ' .. unseen_icon, attrs)
    end
 
-   push_text(items, tab_palette.bg, tab_palette.fg, ' ', attrs)
+   push_text(items, tab_palette.bg, tab_palette.fg, outer_padding, attrs)
    return items
 end
 
@@ -457,7 +465,7 @@ local progress_cells = Cells:new():add_segment(RS.progress):add_segment(RS.paddi
 local title_cells = Cells:new()
    :add_segment(RS.scircle_left, ICON_SCIRCLE_LEFT)
    :add_segment(RS.icon)
-   :add_segment(RS.title, nil, nil, attr(attr.intensity('Bold')))
+   :add_segment(RS.title)
    :add_nested_segment(RS.progress)
    :add_segment(RS.unseen_output)
    :add_segment(RS.padding, ' ')
@@ -648,10 +656,11 @@ M.setup = function(opts)
 
    -- BUILTIN EVENT
    wezterm.on('format-tab-title', function(tab, _tabs, _panes, _config, hover, max_width)
-      max_width = umath.clamp(max_width, 5, 22)
+      local max_tab_width = platform.is_mac and 20 or 22
+      max_width = umath.clamp(max_width, 5, max_tab_width)
 
-      if platform.is_win then
-         return render_windows_tab(valid_opts, tab, hover, max_width)
+      if platform.is_win or platform.is_mac then
+         return render_compact_tab(valid_opts, tab, hover, max_width)
       end
 
       if not tab_list[tab.tab_id] then

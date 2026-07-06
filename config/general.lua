@@ -5,6 +5,7 @@ return {
    exit_behavior_messaging = 'Verbose',
    status_update_interval = 1000,
    audible_bell = 'Disabled',
+   notification_handling = 'AlwaysShow',
 
    -- TUI apps such as Codex often use the alternate screen. That screen has no
    -- real scrollback, so keep terminal scrollback predictable and make wheel

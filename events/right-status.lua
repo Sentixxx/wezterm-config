@@ -7,6 +7,7 @@ local platform = require('utils.platform')
 
 local nf = wezterm.nerdfonts
 local attr = Cells.attr
+local status_attrs = platform.is_mac and nil or attr(attr.intensity('Bold'))
 
 ---@alias Event.RightStatusOptionsInput { date_format?: string }
 
@@ -26,6 +27,8 @@ local M = {}
 
 local ICON_SEPARATOR = nf.oct_dash
 local ICON_DATE = nf.fa_calendar
+local ICON_KEY_TABLE = nf.md_table_key
+local ICON_KEY = nf.md_key
 
 ---@type string[]
 local discharging_icons = {
@@ -65,11 +68,13 @@ local colors = {
 local cells = Cells:new()
 
 cells
-   :add_segment('date_icon', ICON_DATE .. '  ', colors.date, attr(attr.intensity('Bold')))
-   :add_segment('date_text', '', colors.date, attr(attr.intensity('Bold')))
+   :add_segment('date_icon', ICON_DATE .. '  ', colors.date, status_attrs)
+   :add_segment('date_text', '', colors.date, status_attrs)
    :add_segment('separator', ' ' .. ICON_SEPARATOR .. '  ', colors.separator)
    :add_segment('battery_icon', '', colors.battery)
-   :add_segment('battery_text', '', colors.battery, attr(attr.intensity('Bold')))
+   :add_segment('battery_text', '', colors.battery, status_attrs)
+   :add_segment('mode_icon', '', { fg = '#89b4fa' }, status_attrs)
+   :add_segment('mode_text', '', { fg = '#cdd6f4' }, status_attrs)
 
 ---@return string, string
 local function battery_info()
@@ -92,6 +97,23 @@ local function battery_info()
    return charge, icon .. ' '
 end
 
+---@param name string
+---@return string
+local function format_key_table_name(name)
+   local label = name
+      :gsub('[_-]+', ' ')
+      :gsub('%s+', ' ')
+      :gsub('^%s+', '')
+      :gsub('%s+$', '')
+      :lower()
+
+   label = label:gsub('%s+mode$', '')
+
+   return (label:gsub('(%a)([%w]*)', function(first, rest)
+      return first:upper() .. rest
+   end))
+end
+
 ---@param opts? Event.RightStatusOptionsInput Default: {date_format = '%a %H:%M:%S'}
 M.setup = function(opts)
    local valid_opts, err = EVENT_OPTS:validate(opts or {})
@@ -103,6 +125,34 @@ M.setup = function(opts)
    ---@cast valid_opts Event.RightStatusOptions
 
    wezterm.on('update-status', function(window, _pane)
+      if platform.is_mac then
+         local name = window:active_key_table()
+         local icon = ''
+         local text = ''
+
+         if name then
+            icon = ICON_KEY_TABLE .. ' '
+            text = format_key_table_name(name)
+         end
+
+         if window:leader_is_active() then
+            icon = ICON_KEY .. ' '
+            text = 'Leader'
+         end
+
+         cells
+            :update_segment_text('mode_icon', icon)
+            :update_segment_text('mode_text', text)
+
+         local segments = {}
+         if text ~= '' then
+            segments = { 'mode_icon', 'mode_text' }
+         end
+
+         window:set_right_status(wezterm.format(cells:render(segments)))
+         return
+      end
+
       local battery_text, battery_icon = battery_info()
 
       cells

@@ -4,14 +4,43 @@ local backdrops = require('utils.backdrops')
 local act = wezterm.action
 
 local mod = {}
+local clipboard_copy_mods = 'CTRL|SHIFT'
+local clipboard_paste_mods = 'CTRL|SHIFT'
+local open_link_mods = 'CTRL'
+local alternate_tab_action = act.SpawnCommandInNewTab({
+   args = { 'bash', '-l' },
+})
 
 if platform.is_mac then
    mod.SUPER = 'SUPER'
    mod.SUPER_REV = 'SUPER|CTRL'
+   clipboard_copy_mods = 'SUPER'
+   clipboard_paste_mods = 'SUPER'
+   open_link_mods = 'SUPER'
+   alternate_tab_action = act.SpawnCommandInNewTab({
+      args = { '/opt/homebrew/bin/bash', '-l' },
+   })
 elseif platform.is_win or platform.is_linux then
    mod.SUPER = 'ALT' -- to not conflict with Windows key shortcuts
    mod.SUPER_REV = 'ALT|CTRL'
+   if platform.is_win then
+      alternate_tab_action = act.SpawnTab({ DomainName = 'wsl:ubuntu-fish' })
+   end
 end
+
+local tab_index_keys = {}
+for i = 1, 8 do
+   table.insert(tab_index_keys, {
+      key = tostring(i),
+      mods = mod.SUPER,
+      action = act.ActivateTab(i - 1),
+   })
+end
+table.insert(tab_index_keys, {
+   key = '9',
+   mods = mod.SUPER,
+   action = act.ActivateTab(-1),
+})
 
 -- stylua: ignore
 local keys = {
@@ -29,7 +58,7 @@ local keys = {
       key = 'F9',
       mods = 'NONE',
       action = act.ActivateKeyTable({
-         name = 'claude_code',
+         name = 'agent_mode',
          one_shot = false,
          until_unknown = false,
          prevent_fallback = false,
@@ -64,13 +93,13 @@ local keys = {
    { key = 'Backspace',  mods = mod.SUPER,     action = act.SendString '\u{15}' },
 
    -- copy/paste --
-   { key = 'c',          mods = 'CTRL|SHIFT',  action = act.CopyTo('Clipboard') },
-   { key = 'v',          mods = 'CTRL|SHIFT',  action = act.PasteFrom('Clipboard') },
+   { key = 'c',          mods = clipboard_copy_mods,  action = act.CopyTo('Clipboard') },
+   { key = 'v',          mods = clipboard_paste_mods, action = act.PasteFrom('Clipboard') },
 
    -- tabs --
    -- tabs: spawn+close
    { key = 't',          mods = mod.SUPER,     action = act.SpawnTab('DefaultDomain') },
-   { key = 't',          mods = mod.SUPER_REV, action = act.SpawnTab({ DomainName = 'wsl:ubuntu-fish' }) },
+   { key = 't',          mods = mod.SUPER_REV, action = alternate_tab_action },
    { key = 'w',          mods = mod.SUPER_REV, action = act.CloseCurrentTab({ confirm = false }) },
 
    -- tabs: navigation
@@ -84,7 +113,7 @@ local keys = {
    { key = '0',          mods = mod.SUPER_REV, action = act.EmitEvent('tabs.reset-tab-title') },
 
    -- tab: hide tab-bar
-   { key = '9',          mods = mod.SUPER,     action = act.EmitEvent('tabs.toggle-tab-bar'), },
+   { key = '9',          mods = mod.SUPER_REV, action = act.EmitEvent('tabs.toggle-tab-bar'), },
 
    -- window --
    -- window: spawn windows
@@ -244,9 +273,13 @@ local keys = {
    },
 }
 
+for _, binding in ipairs(tab_index_keys) do
+   table.insert(keys, binding)
+end
+
 -- stylua: ignore
 local key_tables = {
-   claude_code = {
+   agent_mode = {
       { key = 'Enter', mods = 'SHIFT',  action = act.SendString '\u{1b}[13;2u' },
       { key = 'F9',    mods = 'NONE',   action = 'PopKeyTable' },
    },
@@ -271,7 +304,7 @@ local mouse_bindings = {
    -- Ctrl-click will open the link under the mouse cursor
    {
       event = { Up = { streak = 1, button = 'Left' } },
-      mods = 'CTRL',
+      mods = open_link_mods,
       action = act.OpenLinkAtMouseCursor,
    },
 }

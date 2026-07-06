@@ -3,10 +3,12 @@ local wezterm = require('wezterm')
 local launch_menu = require('config.launch').launch_menu
 local domains = require('config.domains')
 local Cells = require('utils.cells')
+local platform = require('utils.platform')
 
 local nf = wezterm.nerdfonts
 local act = wezterm.action
 local attr = Cells.attr
+local label_attrs = platform.is_mac and nil or attr(attr.intensity('Bold'))
 
 local M = {}
 
@@ -25,7 +27,7 @@ local cells = Cells:new()
    :add_segment('icon_wsl', ' ' .. nf.cod_terminal_linux .. ' ', colors.icon_wsl)
    :add_segment('icon_ssh', ' ' .. nf.md_ssh .. ' ', colors.icon_ssh)
    :add_segment('icon_unix', ' ' .. nf.dev_gnu .. ' ', colors.icon_unix)
-   :add_segment('label_text', '', colors.label_text, attr(attr.intensity('Bold')))
+   :add_segment('label_text', '', colors.label_text, label_attrs)
 
 local function build_choices()
    local choices = {}

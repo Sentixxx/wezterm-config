@@ -1,3 +1,5 @@
+local platform = require('utils.platform')
+
 -- Keep the top bar palette constrained to Catppuccin Mocha tokens.
 -- Do not introduce ad-hoc colors here; this file only composes the preset.
 local mocha = {
@@ -50,42 +52,42 @@ M.topbar = {
 M.topbar.tabs = {
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.teal,
       active_fg = mocha.crust,
       fg = mocha.teal,
    },
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.mauve,
       active_fg = mocha.crust,
       fg = mocha.mauve,
    },
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.peach,
       active_fg = mocha.crust,
       fg = mocha.peach,
    },
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.blue,
       active_fg = mocha.crust,
       fg = mocha.blue,
    },
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.green,
       active_fg = mocha.crust,
       fg = mocha.green,
    },
    {
       inactive = mocha.mantle,
-      hover = mocha.surface0,
+      hover = mocha.surface1,
       active = mocha.red,
       active_fg = mocha.crust,
       fg = mocha.red,
@@ -98,7 +100,7 @@ M.tab_bar = {
    active_tab = {
       bg_color = M.topbar.active,
       fg_color = M.topbar.text_active,
-      intensity = 'Bold',
+      intensity = platform.is_mac and 'Normal' or 'Bold',
    },
    inactive_tab = {
       bg_color = M.topbar.inactive,
